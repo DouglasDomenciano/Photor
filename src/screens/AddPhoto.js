@@ -4,6 +4,8 @@ import { addPost } from '../store/actions/posts'
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Dimensions, Platform, ScrollView, Alert } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 
+const noUser = 'Do you need has logged to share images!'
+
 class AddPhoto extends Component {
     state = {
         image: null,
@@ -11,6 +13,10 @@ class AddPhoto extends Component {
     }
 
     pickImage = () => {
+        if(!this.props.name) {
+            Alert.alert('Fail', noUser)
+            return
+        }
         ImagePicker.showImagePicker({
             title: 'Choose your image',
             maxHeight: 600,
@@ -23,6 +29,10 @@ class AddPhoto extends Component {
     }
 
     save = async () => {
+        if(!this.props.name) {
+            Alert.alert('Fail', noUser)
+            return
+        }
         this.props.onAddPost({
             id: Math.random(),
             nickname: this.props.name,
@@ -49,7 +59,7 @@ class AddPhoto extends Component {
                     <TouchableOpacity onPress={this.pickImage} style={styles.buttom}>
                         <Text style={styles.buttomText}>Select photo</Text>
                     </TouchableOpacity>
-                    <TextInput placeholder='do you have any comment to this photo ?' style={styles.input} value={this.state.comment} onChangeText={comment => this.setState({ comment })} />
+                    <TextInput placeholder='Do you have any comment to this photo ?' editable={!!this.props.name} style={styles.input} value={this.state.comment} onChangeText={comment => this.setState({ comment })} />
                     <TouchableOpacity onPress={this.save} style={styles.buttom}> 
                         <Text style={styles.buttomText}> Save </Text>
                     </TouchableOpacity>
