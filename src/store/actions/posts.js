@@ -1,8 +1,9 @@
-import { SET_POSTS, ADD_COMMENT } from './actionTypes'
+import { SET_POSTS, ADD_COMMENT, CREATING_POST, POST_CREATED } from './actionTypes'
 import axios from 'axios'
 
 export const addPost = post => {
     return dispatch => {
+        dispatch(creatingPost())
         axios({
             url: 'uploadImage',
             baseURL: 'https://us-central1-photor-252ad.cloudfunctions.net/',
@@ -14,7 +15,10 @@ export const addPost = post => {
         .then(res => {
             post.image = res.data.imageURL
             axios.post('/posts.json', { ...post })
-            .then(res => console.log(res.data))
+            .then(res => {
+                dispatch(fetchPosts())
+                dispatch(postCreated())
+            })
             .catch(err => console.log(err))
         })
         .catch(err => console.log(err))
@@ -41,8 +45,20 @@ export const fetchPosts = () => {
         .then(res => {
             const posts = []
             for( let key in res.data){ posts.push({ ...res.data[key], id: key }) }
-            dispatch(setPosts(posts))
+            dispatch(setPosts(posts.reverse()))
         })
         .catch(err => console.log(err))
+    }
+}
+
+export const creatingPost = () => {
+    return {
+        type: CREATING_POST
+    }
+}
+
+export const postCreated = () => {
+    return {
+        type: POST_CREATED
     }
 }

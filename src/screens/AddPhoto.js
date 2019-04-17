@@ -11,6 +11,15 @@ class AddPhoto extends Component {
         image: null,
         comment: ''
     }
+    componentDidUpdate = prevProps => {
+        if(prevProps.loading && !this.props.loading) {
+            this.setState({
+                image: null,
+                comment: ''
+            })
+            this.props.navigation.navigate('Feed')
+        }
+    }
 
     pickImage = () => {
         if(!this.props.name) {
@@ -43,8 +52,6 @@ class AddPhoto extends Component {
                 comment: this.state.comment
             }]
         })
-        this.setState({ image: null, comment: '' })
-        this.props.navigation.navigate('Feed')
     }
 
     render(){
@@ -60,8 +67,8 @@ class AddPhoto extends Component {
                         <Text style={styles.buttomText}>Select photo</Text>
                     </TouchableOpacity>
                     <TextInput placeholder='Do you have any comment to this photo ?' editable={!!this.props.name} style={styles.input} value={this.state.comment} onChangeText={comment => this.setState({ comment })} />
-                    <TouchableOpacity onPress={this.save} style={styles.buttom}> 
-                        <Text style={styles.buttomText}> Save </Text>
+                    <TouchableOpacity onPress={this.save} style={[styles.buttom, this.props.loading ? styles.buttomDisabled : null]}> 
+                        <Text style={styles.buttomText} disabled={this.props.loading}> Save </Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -99,16 +106,20 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#FFF'
     },
+    buttomDisabled: {
+        backgroundColor: '#AAA'
+    },
     input: {
         marginTop: 20,
         width: '90%'
     }
 })
 
-const mapStateToProps = ({ user }) => {
+const mapStateToProps = ({ user, posts }) => {
     return {
         email: user.email,
         name: user.name,
+        loading: posts.isUploading
     }
 }
 
