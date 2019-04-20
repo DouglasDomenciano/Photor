@@ -1,8 +1,9 @@
 import { SET_POSTS, ADD_COMMENT, CREATING_POST, POST_CREATED } from './actionTypes'
+import { setMessage } from "./message";
 import axios from 'axios'
 
 export const addPost = post => {
-    return dispatch => {
+    return (dispatch, getState) => {
         dispatch(creatingPost())
         axios({
             url: 'uploadImage',
@@ -14,21 +15,36 @@ export const addPost = post => {
         })
         .then(res => {
             post.image = res.data.imageURL
-            axios.post('/posts.json', { ...post })
+            axios.post(`/posts.json?auth=${getState().user.token}`, { ...post })
             .then(res => {
                 dispatch(fetchPosts())
                 dispatch(postCreated())
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                    dispatch(setMessage({
+                        title: 'ERROR!',
+                        text: err
+                    }))
+                }
+            )
         })
         .catch(err => console.log(err))
     }
 }
 
 export const addComment = payload => {
-    return {
-        type: ADD_COMMENT,
-        payload
+    return (dispatch, getState) => {
+        axios.get(`/posts/${payload.postId}.json`)
+        .then(res => {
+            const comments = res.data.comments || []
+            comments.push(payload.comment)
+            axios.patch(`/posts/${payload.postId}.json?auth=${getState().user.token}`, { comments})
+            .then(res => {
+                dispatch(fetchPosts())
+            })
+            .catch(err => console.log(err))
+        })
+        .catch(err => conso.log(err))
     }
 }
 

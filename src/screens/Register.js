@@ -1,19 +1,32 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { connect } from "react-redux";
+import { createUser } from "../store/actions/user";
 
 class Register extends Component {
     state = {
         name:'',
         email: '',
         password: ''
-     }
+    }
+
+     componentDidUpdate = prevProps => {
+        if (prevProps.isLoading && !this.props.isLoading) {
+            this.setState({
+                name:'',
+                email: '',
+                password: ''
+            })
+            this.props.navigation.navigate('Profile')
+        }
+    }
     render(){
         return (
             <View style={styles.container}>
                 <TextInput placeholder='Name' style={styles.input} autoFocus={true} value={this.state.name} onChangeText={name => this.setState({ name })} />
                 <TextInput placeholder='Email' style={styles.input} keyboardType='email-address' value={this.state.email} onChangeText={email => this.setState({ email })} />
                 <TextInput placeholder='Password' style={styles.input} secureTextEntry={true} value={this.state.password} onChangeText={password => this.setState({ password })} />
-                <TouchableOpacity onPress={() => {}} style={styles.buttom}>
+                <TouchableOpacity onPress={() => { this.props.onCreateUser(this.state)}} style={styles.buttom}>
                     <Text style={styles.buttomText}>Create Account</Text>
                 </TouchableOpacity>
             </View>
@@ -45,5 +58,14 @@ const styles = StyleSheet.create({
         paddingLeft: 15
     }
 })
-
-export default Register
+const mapStateToProps = ({ user }) => {
+    return {
+        isLoading: user.isLoading
+    }
+}
+const mapDispatchToProps = dispatch => {
+    return {
+        onCreateUser: user => dispatch(createUser(user))
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Register)
